@@ -1,23 +1,16 @@
 package ru.belov.bussearching.services;
 
-import java.util.List;
-
+import ru.belov.bussearching.model.Bus;
 import ru.belov.bussearching.model.Station;
 
-public interface BusService {
+
+public interface BusService extends CrudService<Bus>{
 
     /**
-     * Сохранить маршрут.
-     * @param name номер маршрута
-     * @param stations список остановок
-     */
-    void save(String name, List<Station> stations);
-
-    /**
-     * Найти маршрут.
+     * Поиск маршрута.
      * @param startPoint точка отправления
      * @param endPoint точка прибытия
-     * @return номер маршрута
+     * @return маршрут
      */
-    String findBus(String startPoint, String endPoint);
+    Bus findBus(Station startPoint, Station endPoint);
 }

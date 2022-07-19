@@ -6,11 +6,17 @@ import java.util.Objects;
 
 public class Station {
 
-    private int id;
+    private long id;
     private String name;
+
+    public Station(){}
 
     public Station(int id, String name) {
         this.id = id;
+        this.name = name;
+    }
+
+    public Station(String name) {
         this.name = name;
     }
 
@@ -22,12 +28,21 @@ public class Station {
         this.name = name;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "Station{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
     }
 
     @Override
@@ -41,14 +56,5 @@ public class Station {
     @Override
     public int hashCode() {
         return Objects.hash(id, name);
-    }
-
-    @NonNull
-    @Override
-    public String toString() {
-        return "Station{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
     }
 }

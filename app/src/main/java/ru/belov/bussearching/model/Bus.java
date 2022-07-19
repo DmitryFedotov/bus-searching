@@ -8,15 +8,27 @@ import java.util.Objects;
 
 public class Bus {
 
-    private int id;
+    private long id;
     private String name;
     private List<Station> stations = new ArrayList<>();
 
-    public int getId() {
+    public Bus() {}
+
+    public Bus(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public Bus(String name, List<Station> stations) {
+        this.name = name;
+        this.stations = stations;
+    }
+
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

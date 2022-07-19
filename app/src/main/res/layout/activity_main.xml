@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.circularreveal.CircularRevealLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         tools:context=".activities.MainActivity">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -16,10 +17,83 @@
                 android:layout_width="match_parent"
                 android:background="?attr/colorPrimary"
                 app:popupTheme="@style/Theme.BusSearching.PopupOverlay"
-                android:layout_height="?attr/actionBarSize" />
+                android:layout_height="?attr/actionBarSize"
+                app:title="@string/app_name"
+                app:titleMargin="4dp"
+                app:titleTextAppearance="@style/TextAppearance.AppCompat.Medium" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include layout="@layout/content_main" />
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="50dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginTop="250dp">
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        <TextView
+                android:text="@string/textview"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewStartPoint"
+                android:layout_weight="1" />
+    </LinearLayout>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:layout_marginTop="10dp">
+
+        <TextView
+                android:text="@string/textviewEndPoint"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView2"
+                android:layout_weight="1" />
+    </LinearLayout>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="50dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="50dp">
+
+        <Button
+                android:text="@string/buttonSearchBus"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:id="@+id/button2"
+                android:layout_weight="1" />
+    </LinearLayout>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="250dp">
+
+        <Button
+                android:text="@string/buttonBusesActivity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/buttonBusesActivity"
+                android:layout_weight="1"
+                android:layout_marginEnd="5dp"
+                style="?android:attr/buttonBarButtonStyle" />
+
+        <Button
+                android:text="@string/buttonStationsActivity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/buttonStationsActivity"
+                android:layout_weight="1"
+                style="?android:attr/buttonBarButtonStyle" />
+    </LinearLayout>
+
+</com.google.android.material.circularreveal.CircularRevealLinearLayout>
