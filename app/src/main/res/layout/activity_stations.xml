@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".activities.StationsActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:theme="@style/Theme.BusSearching.AppBarOverlay">
+
+        <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:background="?attr/colorPrimary"
+                app:popupTheme="@style/Theme.BusSearching.PopupOverlay"
+                android:layout_height="?attr/actionBarSize"
+                app:title="@string/title_activity_stations" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="680dp"
+            android:id="@+id/linerLayoutBuses"
+            android:layout_marginTop="60dp">
+
+        <ListView
+                android:layout_width="match_parent"
+                android:layout_height="560dp"
+                android:id="@+id/listViewBuses"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="60dp"
+                android:layout_marginTop="10dp"></ListView>
+
+    </LinearLayout>
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:id="@+id/createBusLayout"
+            android:layout_marginTop="200dp"
+            android:visibility="invisible"
+            android:background="#000000">
+
+        <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:id="@+id/textInputBusNameLayout"
+                android:layout_marginLeft="50dp"
+                android:layout_marginRight="50dp"
+                android:layout_marginTop="50dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/nameStation"
+                    android:id="@+id/textInputBusName" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+                android:text="@string/save"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/saveBusButton"
+                android:layout_marginLeft="50dp"
+                android:layout_marginRight="50dp"
+                android:onClick="saveStationButtonClick"
+                android:layout_marginTop="10dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/horizontalLayoutStations"
+            android:layout_marginTop="630dp">
+
+        <Button
+                android:text="@string/buttonCreate"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/buttonCreateBus"
+                android:layout_weight="1"
+                android:onClick="createStationButtonClick"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp" />
+
+        <Button
+                android:text="@string/buttonDelete"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/buttonDeleteBus"
+                android:layout_weight="1"
+                android:layout_marginRight="5dp"
+                android:onClick="deleteStationButtonClick"
+                android:layout_marginLeft="5dp" />
+    </LinearLayout>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/navigationLayout"
+            android:layout_marginTop="677dp">
+
+        <Button
+                android:text="@string/buttonSearchBus"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/buttonSearchBusNavigate1"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:onClick="navigateSearchBusButtonClick"
+                android:layout_marginRight="5dp"
+                style="?android:attr/buttonBarButtonStyle" />
+
+        <Button
+                android:text="@string/buttonBusesActivity"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/buttonStationsNavigate"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:onClick="navigateBusesButtonClick"
+                style="?android:attr/buttonBarButtonStyle" />
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

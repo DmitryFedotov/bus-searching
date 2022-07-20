@@ -23,4 +23,11 @@ public interface CrudService<T> {
      * @param id идентификатор объекта
      */
     void delete(long id);
+
+    /**
+     * Найти объект по названию.
+     * @param name название объекта
+     * @return объект
+     */
+    T findByName(String name);
 }

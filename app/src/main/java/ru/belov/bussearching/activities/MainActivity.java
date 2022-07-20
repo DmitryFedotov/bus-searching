@@ -1,66 +1,74 @@
 package ru.belov.bussearching.activities;
 
+import static ru.belov.bussearching.utils.EmptinessUtils.isNotEmpty;
+
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-
 import ru.belov.bussearching.R;
-import ru.belov.bussearching.databinding.ActivityMainBinding;
+import ru.belov.bussearching.model.Bus;
+import ru.belov.bussearching.model.Station;
+import ru.belov.bussearching.services.BusService;
+import ru.belov.bussearching.services.StationService;
+import ru.belov.bussearching.services.impl.BusServiceImpl;
+import ru.belov.bussearching.services.impl.StationServiceImpl;
 
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    private AppBarConfiguration appBarConfiguration;
-    private ActivityMainBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-
-        setSupportActionBar(binding.toolbar);
-
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+        setContentView(R.layout.activity_main);
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+    public void navigateStationsButtonClick(View view) {
+        Intent intent = new Intent(this, StationsActivity.class);
+        startActivity(intent);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+    public void navigateBusesButtonClick(View view) {
+        Intent intent = new Intent(this, BusesActivity.class);
+        startActivity(intent);
+    }
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+    @SuppressLint("ShowToast")
+    public void findBusButtonClick(View view) {
+        EditText editTextStartPoint = findViewById(R.id.textViewStartPoint);
+        EditText editTextEndPoint = findViewById(R.id.textViewEndPoint);
+        TextView result = findViewById(R.id.textViewResult);
+        result.setVisibility(View.INVISIBLE);
+        if (isNotEmpty(editTextStartPoint.getText().toString())
+                && isNotEmpty(editTextEndPoint.getText().toString())) {
+            StationService stationService = new StationServiceImpl(this);
+            Station startPoint = stationService.findByName(editTextStartPoint.getText().toString());
+            Station endPoint = stationService.findByName(editTextEndPoint.getText().toString());
+            if (isNotEmpty(startPoint)) {
+                if (isNotEmpty(endPoint)) {
+                    BusService busService = new BusServiceImpl(this);
+                    Bus bus = busService.findBus(startPoint, endPoint);
+                    if (isNotEmpty(bus)) {
+                        String success = "Маршрут: " + bus.getName();
+                        result.setText(success);
+                    } else {
+                        result.setText("Такой маршрут не найден!");
+                    }
+                    result.setVisibility(View.VISIBLE);
+                } else {
+                    Toast.makeText(this, "Такой конечной точки нет в БД", Toast.LENGTH_SHORT);
+                }
+            } else {
+                Toast.makeText(this, "Такой точки отправления нет в БД", Toast.LENGTH_SHORT);
+            }
         }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        return NavigationUI.navigateUp(navController, appBarConfiguration)
-                || super.onSupportNavigateUp();
     }
 }

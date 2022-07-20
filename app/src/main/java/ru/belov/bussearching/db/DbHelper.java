@@ -23,12 +23,12 @@ public class DbHelper extends SQLiteOpenHelper {
         // создаем таблицу с остановками
         db.execSQL("CREATE TABLE " + STATIONS_TABLE + " ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
-                + "name TEXT"
+                + "name TEXT UNIQUE"
                 +  ");");
         //создаем таблицу с маршрутами
         db.execSQL("CREATE TABLE " + BUSES_TABLE + " ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
-                + "name TEXT"
+                + "name TEXT UNIQUE"
                 +  ");");
         //создаем результирующую таблицу
         db.execSQL("CREATE TABLE " + BUSES_STATIONS_TABLE + " ("

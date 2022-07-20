@@ -30,9 +30,9 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="50dp"
             android:layout_marginLeft="50dp"
-            android:layout_marginTop="250dp">
+            android:layout_marginTop="200dp">
 
-        <TextView
+        <EditText
                 android:text="@string/textview"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -48,11 +48,11 @@
             android:layout_marginRight="50dp"
             android:layout_marginTop="10dp">
 
-        <TextView
+        <EditText
                 android:text="@string/textviewEndPoint"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:id="@+id/textView2"
+                android:id="@+id/textViewEndPoint"
                 android:layout_weight="1" />
     </LinearLayout>
 
@@ -68,15 +68,29 @@
                 android:text="@string/buttonSearchBus"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:id="@+id/button2"
+                android:id="@+id/findBusButton"
+                android:onClick="findBusButtonClick"
                 android:layout_weight="1" />
     </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp">
+
+        <TextView
+                android:layout_width="102dp"
+                android:layout_height="28dp"
+                android:id="@+id/textViewResult"
+                tools:layout_editor_absoluteY="36dp"
+                tools:layout_editor_absoluteX="154dp"
+                tools:visibility="invisible" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="250dp">
+            android:layout_marginTop="150dp">
 
         <Button
                 android:text="@string/buttonBusesActivity"
@@ -85,6 +99,7 @@
                 android:id="@+id/buttonBusesActivity"
                 android:layout_weight="1"
                 android:layout_marginEnd="5dp"
+                android:onClick="navigateBusesButtonClick"
                 style="?android:attr/buttonBarButtonStyle" />
 
         <Button
@@ -93,6 +108,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/buttonStationsActivity"
                 android:layout_weight="1"
+                android:onClick="navigateStationsButtonClick"
                 style="?android:attr/buttonBarButtonStyle" />
     </LinearLayout>
 

@@ -14,6 +14,16 @@
             android:theme="@style/Theme.BusSearching"
             tools:targetApi="31">
         <activity
+                android:name=".activities.BusesActivity"
+                android:exported="false"
+                android:label="@string/title_activity_buses"
+                android:theme="@style/Theme.BusSearching.NoActionBar"/>
+        <activity
+                android:name=".activities.StationsActivity"
+                android:exported="false"
+                android:label="@string/title_activity_stations"
+                android:theme="@style/Theme.BusSearching.NoActionBar" />
+        <activity
                 android:name=".activities.MainActivity"
                 android:exported="true"
                 android:label="@string/app_name"

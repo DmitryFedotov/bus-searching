@@ -14,4 +14,11 @@
     <string name="buttonSearchBus">Поиск маршрута</string>
     <string name="buttonBusesActivity">Маршруты</string>
     <string name="buttonStationsActivity">Остановки</string>
+    <string name="title_activity_stations">Список остановок</string>
+    <string name="title_activity_buses">Список маршрутов</string>
+    <string name="buttonCreate">Добавить</string>
+    <string name="buttonDelete">Удалить</string>
+    <string name="nameStation">Название остановки</string>
+    <string name="nameBus">Название маршрута</string>
+    <string name="save">Сохранить</string>
 </resources>

@@ -9,15 +9,16 @@ import static ru.belov.bussearching.utils.Constants.COLUMN_STATION_ID;
 import static ru.belov.bussearching.utils.Constants.STATIONS_TABLE;
 import static ru.belov.bussearching.utils.EmptinessUtils.isEmpty;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Inject;
 
 import ru.belov.bussearching.db.DbHelper;
 import ru.belov.bussearching.model.Bus;
@@ -29,13 +30,33 @@ public class BusServiceImpl implements BusService {
     private final String LOG_TAG = BusServiceImpl.class.toString();
     private DbHelper dbHelper;
 
-    public BusServiceImpl(){}
-
-
-    public BusServiceImpl(DbHelper dbHelper) {
-        this.dbHelper = dbHelper;
+    public BusServiceImpl(Context context) {
+        this.dbHelper = new DbHelper(context);
     }
 
+    @Override
+    public Bus findByName(String name) {
+        Bus result = new Bus();
+        try {
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            String select = "SELECT * FROM " + BUSES_TABLE + " WHERE name=?";
+            @SuppressLint("Recycle")
+            Cursor c = db.rawQuery(select, new String[]{ name });
+            if (c.moveToFirst()) {
+                int idColIndex = c.getColumnIndex(COLUMN_ID);
+                int nameColIndex = c.getColumnIndex(COLUMN_NAME);
+                result.setId(c.getInt(idColIndex));
+                result.setName(c.getString(nameColIndex));
+            } else {
+                Log.i(LOG_TAG, "Пустая таблица маршрутов.");
+            }
+        } catch (SQLException e) {
+            Log.e(LOG_TAG, "Ошибка получения списка маршрутов из базы данных.", e);
+        } finally {
+            dbHelper.close();
+        }
+        return result;
+    }
 
     @Override
     public void create(Bus object) {
@@ -62,7 +83,26 @@ public class BusServiceImpl implements BusService {
 
     @Override
     public List<Bus> findAll() {
-        return null;
+        List<Bus> result = new ArrayList<>();
+        try {
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            @SuppressLint("Recycle")
+            Cursor c = db.query(BUSES_TABLE, null, null, null, null, null, null);
+            if (c.moveToFirst()) {
+                int nameColIndex = c.getColumnIndex(COLUMN_NAME);
+                int idColIndex = c.getColumnIndex(COLUMN_ID);
+                do {
+                    result.add(new Bus(c.getInt(idColIndex), c.getString(nameColIndex)));
+                } while (c.moveToNext());
+            } else {
+                Log.i(LOG_TAG, "Пустая таблица маршрутов.");
+            }
+        } catch (SQLException e) {
+            Log.e(LOG_TAG, "Ошибка получения списка маршрутов из базы данных.", e);
+        } finally {
+            dbHelper.close();
+        }
+        return result;
     }
 
     @Override
@@ -88,9 +128,9 @@ public class BusServiceImpl implements BusService {
         Bus result = new Bus();
         try {
             SQLiteDatabase db = dbHelper.getWritableDatabase();
-            String select = "\"SELECT * FROM " + BUSES_STATIONS_TABLE + " WHERE stationId=" + startPoint.getId()
-                    + " AND busId=(SELECT busId FROM " + BUSES_STATIONS_TABLE + " WHERE stationId=" + endPoint.getId() + ")\"";
-            Cursor c = db.query(STATIONS_TABLE, null, select, null, null, null, null);
+            String select = "SELECT * FROM " + BUSES_STATIONS_TABLE + " WHERE stationId=? AND busId=(SELECT busId FROM "
+                    + BUSES_STATIONS_TABLE + " WHERE stationId=?)";
+            Cursor c = db.rawQuery(select, new String[] {String.valueOf(startPoint.getId()), String.valueOf(endPoint.getId())});
             if (c.moveToFirst()) {
                 int idColIndex = c.getColumnIndex(COLUMN_ID);
                 int nameColIndex = c.getColumnIndex(COLUMN_NAME);

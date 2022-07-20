@@ -7,6 +7,7 @@ import static ru.belov.bussearching.utils.EmptinessUtils.isEmpty;
 
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -14,8 +15,6 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Inject;
 
 import ru.belov.bussearching.db.DbHelper;
 import ru.belov.bussearching.model.Station;
@@ -26,32 +25,9 @@ public class StationServiceImpl implements StationService {
     private final String LOG_TAG = StationServiceImpl.class.toString();
     private DbHelper dbHelper;
 
-    public StationServiceImpl() {}
-
-    public StationServiceImpl(DbHelper dbHelper) {
-        this.dbHelper = dbHelper;
+    public StationServiceImpl(Context context) {
+        this.dbHelper = new DbHelper(context);
     }
-
-
-    public boolean update(Station station) {
-        if (isEmpty(station)) {
-            Log.e(LOG_TAG, "Невозможно обновить остановку, передан пустой аргумент.");
-            return false;
-        }
-        try {
-            SQLiteDatabase db = dbHelper.getWritableDatabase();
-            ContentValues cv = new ContentValues();
-            cv.put(COLUMN_NAME, station.getName());
-            db.update(STATIONS_TABLE, cv, COLUMN_ID + "=" + station.getId(), null);
-            return true;
-        } catch (SQLException e) {
-            Log.e(LOG_TAG, "Ошибка обновления остановки в базе данных.");
-        } finally {
-            dbHelper.close();
-        }
-        return false;
-    }
-
 
     @Override
     public void create(Station object) {
@@ -115,9 +91,9 @@ public class StationServiceImpl implements StationService {
         Station result = new Station();
         try {
             SQLiteDatabase db = dbHelper.getWritableDatabase();
-            String select = "\"SELECT * FROM " + STATIONS_TABLE + "WHERE name=" + name + "\"";
+            String select = "SELECT * FROM " + STATIONS_TABLE + " WHERE name=?";
             @SuppressLint("Recycle")
-            Cursor c = db.query(STATIONS_TABLE, null, select, null, null, null, null);
+            Cursor c = db.rawQuery(select, new String[]{ name });
             if (c.moveToFirst()) {
                 int idColIndex = c.getColumnIndex(COLUMN_ID);
                 int nameColIndex = c.getColumnIndex(COLUMN_NAME);
