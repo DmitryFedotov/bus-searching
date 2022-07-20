@@ -8,6 +8,7 @@ import static ru.belov.bussearching.utils.Constants.COLUMN_NAME;
 import static ru.belov.bussearching.utils.Constants.COLUMN_STATION_ID;
 import static ru.belov.bussearching.utils.Constants.STATIONS_TABLE;
 import static ru.belov.bussearching.utils.EmptinessUtils.isEmpty;
+import static ru.belov.bussearching.utils.EmptinessUtils.isNotEmpty;
 
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
@@ -50,6 +51,7 @@ public class BusServiceImpl implements BusService {
             } else {
                 Log.i(LOG_TAG, "Пустая таблица маршрутов.");
             }
+            c.close();
         } catch (SQLException e) {
             Log.e(LOG_TAG, "Ошибка получения списка маршрутов из базы данных.", e);
         } finally {
@@ -68,10 +70,25 @@ public class BusServiceImpl implements BusService {
             cv.put(COLUMN_NAME, object.getName());
             SQLiteDatabase db = dbHelper.getWritableDatabase();
             db.insert(BUSES_TABLE, null, cv);
+            dbHelper.close();
+            createBusStation(object);
+        } catch (SQLException e) {
+            Log.e(LOG_TAG, "Ошибка сохранения маршрута в базу данных.", e);
+        } finally {
+            dbHelper.close();
+        }
+    }
+
+    private void createBusStation(Bus object) {
+        try {
+            ContentValues cv = new ContentValues();
+            Bus bus = findByName(object.getName());
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
             for (Station station : object.getStations()) {
                 cv.clear();
-                cv.put(COLUMN_BUS_ID, object.getId());
+                cv.put(COLUMN_BUS_ID, bus.getId());
                 cv.put(COLUMN_STATION_ID, station.getId());
+                Log.i(LOG_TAG, "insert bus_station = " + cv);
                 db.insert(BUSES_STATIONS_TABLE, null, cv);
             }
         } catch (SQLException e) {
@@ -97,6 +114,7 @@ public class BusServiceImpl implements BusService {
             } else {
                 Log.i(LOG_TAG, "Пустая таблица маршрутов.");
             }
+            c.close();
         } catch (SQLException e) {
             Log.e(LOG_TAG, "Ошибка получения списка маршрутов из базы данных.", e);
         } finally {
@@ -128,10 +146,26 @@ public class BusServiceImpl implements BusService {
         Bus result = new Bus();
         try {
             SQLiteDatabase db = dbHelper.getWritableDatabase();
-            String select = "SELECT * FROM " + BUSES_STATIONS_TABLE + " WHERE stationId=? AND busId=(SELECT busId FROM "
-                    + BUSES_STATIONS_TABLE + " WHERE stationId=?)";
+            String select = "SELECT * FROM " + BUSES_STATIONS_TABLE + " AS t1, " + BUSES_STATIONS_TABLE + " AS t2"
+                    //+ " JOIN " + BUSES_STATIONS_TABLE + " AS t2 ON t2.busId = t1.busId"
+                    + " WHERE t2.busId = t1.busId and t1.stationId = ? AND t2.stationId = ?";
+            @SuppressLint("Recycle")
+            Cursor cursor = db.query(BUSES_STATIONS_TABLE, null, null, null, null, null, null);
+            if (cursor.moveToFirst()) {
+                int nameColIndex = cursor.getColumnIndex(COLUMN_STATION_ID);
+                int idColIndex = cursor.getColumnIndex(COLUMN_BUS_ID);
+                do {
+                   Log.i(LOG_TAG, "busId = " + cursor.getInt(idColIndex) + " stationId = " + cursor.getString(nameColIndex));
+                } while (cursor.moveToNext());
+            } else {
+                Log.i(LOG_TAG, "Пустая таблица маршрутов с остановками.");
+            }
+            Log.i(LOG_TAG, select);
+            @SuppressLint("Recycle")
             Cursor c = db.rawQuery(select, new String[] {String.valueOf(startPoint.getId()), String.valueOf(endPoint.getId())});
-            if (c.moveToFirst()) {
+            Log.i(LOG_TAG, "Station1.getId() = " + startPoint.getId() + " getName() = " + startPoint.getName());
+            Log.i(LOG_TAG, "Station2.getId() = " + endPoint.getId() + " getName() = " + endPoint.getName());
+            if (c.moveToFirst() && isNotEmpty(c.getCount())) {
                 int idColIndex = c.getColumnIndex(COLUMN_ID);
                 int nameColIndex = c.getColumnIndex(COLUMN_NAME);
                 result.setId(c.getInt(idColIndex));
@@ -139,7 +173,8 @@ public class BusServiceImpl implements BusService {
             } else {
                 Log.i(LOG_TAG, "Маршрут с такой точкой отправления и прибытия не найден.");
             }
-        } catch (SQLException e) {
+            c.close();
+        } catch (Exception e) {
             Log.e(LOG_TAG, "Ошибка поиска маршрута в базе данных.", e);
         } finally {
             dbHelper.close();

@@ -8,6 +8,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -86,6 +87,8 @@ public class BusesActivity extends AppCompatActivity {
             for (int i = 0; i < sp.size(); i++) {
                 if (sp.valueAt(i)) {
                     stations.add(stationService.findByName(stationsList.getItemAtPosition(i).toString()));
+                    Log.i("log_tag", "station findByName id = " + stations.get(i).getId()
+                            + " name = " + stations.get(i).getName());
                 }
             }
             busService.create(new Bus(inputEditText.getText().toString(), stations));
