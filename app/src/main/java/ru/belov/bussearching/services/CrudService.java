@@ -30,4 +30,11 @@ public interface CrudService<T> {
      * @return объект
      */
     T findByName(String name);
+
+    /**
+     * Получить объект {@link T} по id.
+     * @param id объекта
+     * @return объект {@link T}
+     */
+    T findById(long id);
 }

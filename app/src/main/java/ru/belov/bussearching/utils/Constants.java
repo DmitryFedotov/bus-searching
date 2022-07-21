@@ -31,4 +31,6 @@ public final class Constants {
 
     public static final int DB_VERSION = 1;
     public static final String DB_NAME = "BusSearchingDB";
+    public static final String SELECT_FROM = "SELECT * FROM ";
+    public static final String INSERT_INTO = "INSERT INTO ";
 }

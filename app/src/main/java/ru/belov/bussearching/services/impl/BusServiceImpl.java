@@ -6,7 +6,7 @@ import static ru.belov.bussearching.utils.Constants.COLUMN_BUS_ID;
 import static ru.belov.bussearching.utils.Constants.COLUMN_ID;
 import static ru.belov.bussearching.utils.Constants.COLUMN_NAME;
 import static ru.belov.bussearching.utils.Constants.COLUMN_STATION_ID;
-import static ru.belov.bussearching.utils.Constants.STATIONS_TABLE;
+import static ru.belov.bussearching.utils.Constants.SELECT_FROM;
 import static ru.belov.bussearching.utils.EmptinessUtils.isEmpty;
 import static ru.belov.bussearching.utils.EmptinessUtils.isNotEmpty;
 
@@ -25,14 +25,17 @@ import ru.belov.bussearching.db.DbHelper;
 import ru.belov.bussearching.model.Bus;
 import ru.belov.bussearching.model.Station;
 import ru.belov.bussearching.services.BusService;
+import ru.belov.bussearching.services.StationService;
 
 public class BusServiceImpl implements BusService {
 
     private final String LOG_TAG = BusServiceImpl.class.toString();
     private DbHelper dbHelper;
+    private StationService stationService;
 
     public BusServiceImpl(Context context) {
         this.dbHelper = new DbHelper(context);
+        this.stationService = new StationServiceImpl(context);
     }
 
     @Override
@@ -40,7 +43,7 @@ public class BusServiceImpl implements BusService {
         Bus result = new Bus();
         try {
             SQLiteDatabase db = dbHelper.getWritableDatabase();
-            String select = "SELECT * FROM " + BUSES_TABLE + " WHERE name=?";
+            String select = SELECT_FROM + BUSES_TABLE + " WHERE name=?";
             @SuppressLint("Recycle")
             Cursor c = db.rawQuery(select, new String[]{ name });
             if (c.moveToFirst()) {
@@ -109,7 +112,7 @@ public class BusServiceImpl implements BusService {
                 int nameColIndex = c.getColumnIndex(COLUMN_NAME);
                 int idColIndex = c.getColumnIndex(COLUMN_ID);
                 do {
-                    result.add(new Bus(c.getInt(idColIndex), c.getString(nameColIndex)));
+                    result.add(new Bus(c.getInt(idColIndex), c.getString(nameColIndex), stationService.getStationsByBusId(c.getInt(idColIndex))));
                 } while (c.moveToNext());
             } else {
                 Log.i(LOG_TAG, "Пустая таблица маршрутов.");
@@ -139,41 +142,54 @@ public class BusServiceImpl implements BusService {
     }
 
     @Override
-    public Bus findBus(Station startPoint, Station endPoint) {
-        if (isEmpty(startPoint) || isEmpty(endPoint)) {
-            throw new IllegalArgumentException("Для получения маршрута необходимо передать точку отправления и точку прибытия");
-        }
+    public Bus findById(long id) {
         Bus result = new Bus();
         try {
             SQLiteDatabase db = dbHelper.getWritableDatabase();
-            String select = "SELECT * FROM " + BUSES_STATIONS_TABLE + " AS t1, " + BUSES_STATIONS_TABLE + " AS t2"
-                    //+ " JOIN " + BUSES_STATIONS_TABLE + " AS t2 ON t2.busId = t1.busId"
-                    + " WHERE t2.busId = t1.busId and t1.stationId = ? AND t2.stationId = ?";
+            String select = SELECT_FROM + BUSES_TABLE + " WHERE id=?";
             @SuppressLint("Recycle")
-            Cursor cursor = db.query(BUSES_STATIONS_TABLE, null, null, null, null, null, null);
-            if (cursor.moveToFirst()) {
-                int nameColIndex = cursor.getColumnIndex(COLUMN_STATION_ID);
-                int idColIndex = cursor.getColumnIndex(COLUMN_BUS_ID);
-                do {
-                   Log.i(LOG_TAG, "busId = " + cursor.getInt(idColIndex) + " stationId = " + cursor.getString(nameColIndex));
-                } while (cursor.moveToNext());
-            } else {
-                Log.i(LOG_TAG, "Пустая таблица маршрутов с остановками.");
-            }
-            Log.i(LOG_TAG, select);
-            @SuppressLint("Recycle")
-            Cursor c = db.rawQuery(select, new String[] {String.valueOf(startPoint.getId()), String.valueOf(endPoint.getId())});
-            Log.i(LOG_TAG, "Station1.getId() = " + startPoint.getId() + " getName() = " + startPoint.getName());
-            Log.i(LOG_TAG, "Station2.getId() = " + endPoint.getId() + " getName() = " + endPoint.getName());
-            if (c.moveToFirst() && isNotEmpty(c.getCount())) {
+            Cursor c = db.rawQuery(select, new String[]{ String.valueOf(id) });
+            if (c.moveToFirst()) {
                 int idColIndex = c.getColumnIndex(COLUMN_ID);
                 int nameColIndex = c.getColumnIndex(COLUMN_NAME);
                 result.setId(c.getInt(idColIndex));
                 result.setName(c.getString(nameColIndex));
             } else {
-                Log.i(LOG_TAG, "Маршрут с такой точкой отправления и прибытия не найден.");
+                Log.i(LOG_TAG, "Пустая таблица маршрутов.");
             }
             c.close();
+        } catch (SQLException e) {
+            Log.e(LOG_TAG, "Ошибка получения списка маршрутов из базы данных.", e);
+        } finally {
+            dbHelper.close();
+        }
+        return result;
+    }
+
+    @Override
+    public Bus findBus(Station startPoint, Station endPoint) {
+        if (isEmpty(startPoint) || isEmpty(endPoint)) {
+            throw new IllegalArgumentException("Для получения маршрута необходимо передать точку отправления и точку прибытия");
+        }
+        Bus result = null;
+        try {
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            String select = SELECT_FROM + BUSES_STATIONS_TABLE + " AS t1, " + BUSES_STATIONS_TABLE + " AS t2"
+                    + " WHERE t2.busId = t1.busId and t1.stationId = ? AND t2.stationId = ?";
+            Log.i(LOG_TAG, select);
+            @SuppressLint("Recycle")
+            Cursor c = db.rawQuery(select, new String[] {String.valueOf(startPoint.getId()), String.valueOf(endPoint.getId())});
+
+            if (c.moveToFirst() && isNotEmpty(c.getCount())) {
+                int idColIndex = c.getColumnIndex(COLUMN_BUS_ID);
+                long id = c.getInt(idColIndex);
+                c.close();
+                dbHelper.close();
+                result = findById(id);
+            } else {
+                Log.i(LOG_TAG, "Маршрут с такой точкой отправления и прибытия не найден.");
+                c.close();
+            }
         } catch (Exception e) {
             Log.e(LOG_TAG, "Ошибка поиска маршрута в базе данных.", e);
         } finally {

@@ -8,6 +8,7 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
@@ -18,6 +19,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import ru.belov.bussearching.R;
 import ru.belov.bussearching.model.Station;
@@ -27,7 +29,7 @@ import ru.belov.bussearching.services.impl.StationServiceImpl;
 public class StationsActivity extends AppCompatActivity {
 
     private StationService stationService;
-    ListView stationsList;
+    private ListView stationsList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,11 +40,6 @@ public class StationsActivity extends AppCompatActivity {
         stationsList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
         stationService = new StationServiceImpl(this);
-        stationService.create(new Station("Центр"));
-        stationService.create(new Station("Восток"));
-        stationService.create(new Station("Запад"));
-        stationService.create(new Station("Юг"));
-        stationService.create(new Station("Север"));
         updateListView();
     }
 
@@ -66,12 +63,16 @@ public class StationsActivity extends AppCompatActivity {
 
     public void saveStationButtonClick(View view) {
         TextInputEditText inputEditText = findViewById(R.id.textInputBusName);
-        if (isNotEmpty(inputEditText.getText().toString())) {
+        if (isNotEmpty(Objects.requireNonNull(inputEditText.getText()).toString())) {
             stationService.create(new Station(inputEditText.getText().toString()));
         }
         updateListView();
-        InputMethodManager inputManager = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputManager.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        try {
+            InputMethodManager inputManager = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManager.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        } catch (NullPointerException e){
+            Log.d(this.getClass().toString(), "Ошибка закрытия клавиатуры, клавиатура не найдена.");
+        }
         LinearLayout layout = findViewById(R.id.createBusLayout);
         layout.setVisibility(View.INVISIBLE);
         inputEditText.getText().clear();

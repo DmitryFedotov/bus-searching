@@ -12,6 +12,7 @@ import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -42,7 +43,7 @@ public class BusesActivity extends AppCompatActivity {
 
         busService = new BusServiceImpl(this);
         busesList = findViewById(R.id.listViewBuses);
-        busesList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        busesList.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         updateListView();
     }
 
@@ -54,7 +55,7 @@ public class BusesActivity extends AppCompatActivity {
         List<Bus> buses = busService.findAll();
         if (isNotEmpty(buses)) {
             for (Bus bus : buses) {
-                busesNames.add(bus.getName());
+                busesNames.add(bus.getName() + bus.stationsToString());
             }
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_single_choice, busesNames);
@@ -64,7 +65,7 @@ public class BusesActivity extends AppCompatActivity {
     public void createBusButtonClick(View view) {
         LinearLayout layout = findViewById(R.id.createBusLayout);
         ListView stationsList = findViewById(R.id.listViewStationsAdd);
-        stationsList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+        stationsList.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
         List<String> stationsNames = new ArrayList<>();
         StationService stationService = new StationServiceImpl(this);
         List<Station> stations = stationService.findAll();
@@ -85,16 +86,19 @@ public class BusesActivity extends AppCompatActivity {
             StationService stationService = new StationServiceImpl(this);
             SparseBooleanArray sp = stationsList.getCheckedItemPositions();
             for (int i = 0; i < sp.size(); i++) {
-                if (sp.valueAt(i)) {
-                    stations.add(stationService.findByName(stationsList.getItemAtPosition(i).toString()));
-                    Log.i("log_tag", "station findByName id = " + stations.get(i).getId()
-                            + " name = " + stations.get(i).getName());
+                int key = sp.keyAt(i);
+                if (sp.get(key)) {
+                    stations.add(stationService.findByName(stationsList.getItemAtPosition(key).toString()));
                 }
             }
             busService.create(new Bus(inputEditText.getText().toString(), stations));
             updateListView();
-            InputMethodManager inputManager = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
-            inputManager.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            try {
+                InputMethodManager inputManager = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            } catch (NullPointerException e){
+                Log.d(this.getClass().toString(), "Ошибка закрытия клавиатуры, клавиатура не найдена.");
+            }
             LinearLayout layout = findViewById(R.id.createBusLayout);
             layout.setVisibility(View.INVISIBLE);
             inputEditText.getText().clear();

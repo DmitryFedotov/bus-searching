@@ -24,6 +24,12 @@ public class Bus {
         this.stations = stations;
     }
 
+    public Bus(int id, String name, List<Station> stations) {
+        this.id = id;
+        this.name = name;
+        this.stations = stations;
+    }
+
     public long getId() {
         return id;
     }
@@ -48,6 +54,22 @@ public class Bus {
         this.stations = stations;
     }
 
+    public String stationsToString() {
+        if (stations.isEmpty()) {
+            return "";
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append(" ( ");
+        for(int i = 0; i < stations.size(); i++) {
+            builder.append(stations.get(i).getName());
+            if (stations.size() > 1 && stations.size() - 1 != i ) {
+                builder.append(" -> ");
+            }
+        }
+        builder.append(")");
+        return builder.toString();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -70,4 +92,5 @@ public class Bus {
                 ", stations=" + stations +
                 '}';
     }
+
 }

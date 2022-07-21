@@ -4,6 +4,7 @@ import static ru.belov.bussearching.utils.Constants.BUSES_STATIONS_TABLE;
 import static ru.belov.bussearching.utils.Constants.BUSES_TABLE;
 import static ru.belov.bussearching.utils.Constants.DB_NAME;
 import static ru.belov.bussearching.utils.Constants.DB_VERSION;
+import static ru.belov.bussearching.utils.Constants.INSERT_INTO;
 import static ru.belov.bussearching.utils.Constants.STATIONS_TABLE;
 
 import android.content.Context;
@@ -38,6 +39,16 @@ public class DbHelper extends SQLiteOpenHelper {
                 + "FOREIGN KEY (stationId) REFERENCES " + STATIONS_TABLE + "(id)"
                 + "ON DELETE CASCADE"
                 +  ");");
+        db.execSQL(INSERT_INTO + STATIONS_TABLE + " (name) "
+                + "VALUES('Центр')");
+        db.execSQL(INSERT_INTO + STATIONS_TABLE + " (name) "
+                + "VALUES('Восток')");
+        db.execSQL(INSERT_INTO + STATIONS_TABLE + " (name) "
+                + "VALUES('Запад')");
+        db.execSQL(INSERT_INTO + STATIONS_TABLE + " (name) "
+                + "VALUES('Юг')");
+        db.execSQL(INSERT_INTO + STATIONS_TABLE + " (name) "
+                + "VALUES('Север')");
     }
 
     @Override

@@ -1,7 +1,10 @@
 package ru.belov.bussearching.services.impl;
 
+import static ru.belov.bussearching.utils.Constants.BUSES_STATIONS_TABLE;
 import static ru.belov.bussearching.utils.Constants.COLUMN_ID;
 import static ru.belov.bussearching.utils.Constants.COLUMN_NAME;
+import static ru.belov.bussearching.utils.Constants.COLUMN_STATION_ID;
+import static ru.belov.bussearching.utils.Constants.SELECT_FROM;
 import static ru.belov.bussearching.utils.Constants.STATIONS_TABLE;
 import static ru.belov.bussearching.utils.EmptinessUtils.isEmpty;
 
@@ -91,7 +94,7 @@ public class StationServiceImpl implements StationService {
         Station result = new Station();
         try {
             SQLiteDatabase db = dbHelper.getWritableDatabase();
-            String select = "SELECT * FROM " + STATIONS_TABLE + " WHERE name=?";
+            String select = SELECT_FROM + STATIONS_TABLE + " WHERE name=?";
             @SuppressLint("Recycle")
             Cursor c = db.rawQuery(select, new String[]{ name });
             if (c.moveToFirst()) {
@@ -111,11 +114,49 @@ public class StationServiceImpl implements StationService {
     }
 
     @Override
-    public List<Station> getStationsByName(List<Station> stations) {
+    public List<Station> getStationsByBusId(long busId) {
         List<Station> result = new ArrayList<>();
-        for (Station station :
-             stations) {
-            result.add(findByName(station.getName()));
+        try {
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            String select = SELECT_FROM + BUSES_STATIONS_TABLE + " WHERE busId = ?";
+            Cursor c = db.rawQuery(select, new String[] { String.valueOf(busId) });
+            if (c.moveToFirst()) {
+                int stationIdColIndex = c.getColumnIndex(COLUMN_STATION_ID);
+                do {
+                    result.add(findById(c.getInt(stationIdColIndex)));
+                } while (c.moveToNext());
+            } else {
+                Log.i(LOG_TAG, "Пустая таблица остановок.");
+            }
+            c.close();
+        } catch (Exception e){
+            Log.e(LOG_TAG, "Ошибка получения списка остановок по маршруту.");
+        } finally {
+            dbHelper.close();
+        }
+        return result;
+    }
+
+    @Override
+    public Station findById(long id) {
+        Station result = new Station();
+        try {
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            String select = SELECT_FROM + STATIONS_TABLE + " WHERE id=?";
+            @SuppressLint("Recycle")
+            Cursor c = db.rawQuery(select, new String[]{ String.valueOf(id) });
+            if (c.moveToFirst()) {
+                int idColIndex = c.getColumnIndex(COLUMN_ID);
+                int nameColIndex = c.getColumnIndex(COLUMN_NAME);
+                result.setId(c.getInt(idColIndex));
+                result.setName(c.getString(nameColIndex));
+            } else {
+                Log.i(LOG_TAG, "Пустая таблица остановок.");
+            }
+        } catch (SQLException e) {
+            Log.e(LOG_TAG, "Ошибка получения списка остановок из базы данных.", e);
+        } finally {
+            dbHelper.close();
         }
         return result;
     }
