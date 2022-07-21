@@ -16,12 +16,12 @@ import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import ru.belov.bussearching.R;
 import ru.belov.bussearching.model.Bus;
@@ -35,6 +35,10 @@ public class BusesActivity extends AppCompatActivity {
 
     private BusService busService;
     ListView busesList;
+    private LinearLayout createBusLayout;
+    private LinearLayout stationsLayout;
+    private LinearLayout horizontalLayoutStations;
+    private LinearLayout navigationLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +48,12 @@ public class BusesActivity extends AppCompatActivity {
         busService = new BusServiceImpl(this);
         busesList = findViewById(R.id.listViewBuses);
         busesList.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
+
+        createBusLayout = findViewById(R.id.createBusLayout);
+        stationsLayout = findViewById(R.id.linerLayoutBuses);
+        horizontalLayoutStations = findViewById(R.id.horizontalLayoutStations);
+        navigationLayout = findViewById(R.id.navigationLayout);
+
         updateListView();
     }
 
@@ -63,7 +73,6 @@ public class BusesActivity extends AppCompatActivity {
     }
 
     public void createBusButtonClick(View view) {
-        LinearLayout layout = findViewById(R.id.createBusLayout);
         ListView stationsList = findViewById(R.id.listViewStationsAdd);
         stationsList.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
         List<String> stationsNames = new ArrayList<>();
@@ -74,14 +83,17 @@ public class BusesActivity extends AppCompatActivity {
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, stationsNames);
         stationsList.setAdapter(adapter);
-        layout.setVisibility(View.VISIBLE);
+        createBusLayout.setVisibility(View.VISIBLE);
+        stationsLayout.setVisibility(View.INVISIBLE);
+        horizontalLayoutStations.setVisibility(View.INVISIBLE);
+        navigationLayout.setVisibility(View.INVISIBLE);
     }
 
-    @SuppressLint("ShowToast")
     public void saveBusButtonClick(View view) {
         ListView stationsList = findViewById(R.id.listViewStationsAdd);
         TextInputEditText inputEditText = findViewById(R.id.textInputBusName);
-        if (isNotEmpty(inputEditText) && stationsList.getCheckedItemCount() >= 2) {
+        if (isNotEmpty(Objects.requireNonNull(inputEditText.getText()).toString())
+                && stationsList.getCheckedItemCount() >= 2) {
             List<Station> stations = new ArrayList<>();
             StationService stationService = new StationServiceImpl(this);
             SparseBooleanArray sp = stationsList.getCheckedItemPositions();
@@ -93,22 +105,22 @@ public class BusesActivity extends AppCompatActivity {
             }
             busService.create(new Bus(inputEditText.getText().toString(), stations));
             updateListView();
-            try {
-                InputMethodManager inputManager = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputManager.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-            } catch (NullPointerException e){
-                Log.d(this.getClass().toString(), "Ошибка закрытия клавиатуры, клавиатура не найдена.");
-            }
-            LinearLayout layout = findViewById(R.id.createBusLayout);
-            layout.setVisibility(View.INVISIBLE);
-            inputEditText.getText().clear();
-        } else {
-            Toast.makeText(this, "Заполните название маршрута и выберите не менее 2 остановок!", Toast.LENGTH_SHORT);
         }
+        try {
+            InputMethodManager inputManager = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManager.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        } catch (NullPointerException e){
+            Log.d(this.getClass().toString(), "Ошибка закрытия клавиатуры, клавиатура не найдена.");
+        }
+        createBusLayout.setVisibility(View.INVISIBLE);
+        stationsLayout.setVisibility(View.VISIBLE);
+        horizontalLayoutStations.setVisibility(View.VISIBLE);
+        navigationLayout.setVisibility(View.VISIBLE);
+        inputEditText.getText().clear();
     }
 
     public void deleteBusButtonClick(View view) {
-        if (isNotEmpty(busesList.getCheckedItemPosition())) {
+        if (busesList.getCheckedItemPosition() != -1) {
             Bus deleteBus = busService.findByName(busesList.getItemAtPosition(busesList.getCheckedItemPosition()).toString());
             busService.delete(deleteBus.getId());
             updateListView();

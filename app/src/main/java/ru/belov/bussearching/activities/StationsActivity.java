@@ -2,17 +2,14 @@ package ru.belov.bussearching.activities;
 
 import static ru.belov.bussearching.utils.EmptinessUtils.isNotEmpty;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 
-import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.google.android.material.textfield.TextInputEditText;
@@ -22,11 +19,12 @@ import java.util.List;
 import java.util.Objects;
 
 import ru.belov.bussearching.R;
+import ru.belov.bussearching.dialogs.StationDialogFragment;
 import ru.belov.bussearching.model.Station;
 import ru.belov.bussearching.services.StationService;
 import ru.belov.bussearching.services.impl.StationServiceImpl;
 
-public class StationsActivity extends AppCompatActivity {
+public class StationsActivity extends AppCompatActivity implements StationDialogFragment.NoticeDialogListener{
 
     private StationService stationService;
     private ListView stationsList;
@@ -38,7 +36,6 @@ public class StationsActivity extends AppCompatActivity {
 
         stationsList = findViewById(R.id.listViewBuses);
         stationsList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-
         stationService = new StationServiceImpl(this);
         updateListView();
     }
@@ -57,29 +54,12 @@ public class StationsActivity extends AppCompatActivity {
     }
 
     public void createStationButtonClick(View view) {
-        LinearLayout layout = findViewById(R.id.createBusLayout);
-        layout.setVisibility(View.VISIBLE);
-    }
-
-    public void saveStationButtonClick(View view) {
-        TextInputEditText inputEditText = findViewById(R.id.textInputBusName);
-        if (isNotEmpty(Objects.requireNonNull(inputEditText.getText()).toString())) {
-            stationService.create(new Station(inputEditText.getText().toString()));
-        }
-        updateListView();
-        try {
-            InputMethodManager inputManager = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
-            inputManager.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-        } catch (NullPointerException e){
-            Log.d(this.getClass().toString(), "Ошибка закрытия клавиатуры, клавиатура не найдена.");
-        }
-        LinearLayout layout = findViewById(R.id.createBusLayout);
-        layout.setVisibility(View.INVISIBLE);
-        inputEditText.getText().clear();
+        StationDialogFragment dialog = new StationDialogFragment();
+        dialog.show(getSupportFragmentManager(), "station");
     }
 
     public void deleteStationButtonClick(View view) {
-        if (isNotEmpty(stationsList.getCheckedItemPosition())) {
+        if (stationsList.getCheckedItemPosition() != -1) {
             Station deleteStation = stationService.findByName(stationsList.getItemAtPosition(stationsList.getCheckedItemPosition()).toString());
             stationService.delete(deleteStation.getId());
             updateListView();
@@ -94,5 +74,14 @@ public class StationsActivity extends AppCompatActivity {
     public void navigateBusesButtonClick(View view) {
         Intent intent = new Intent(this, BusesActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        TextInputEditText inputEditText = Objects.requireNonNull(dialog.getDialog()).findViewById(R.id.textInputStation);
+        if (isNotEmpty(Objects.requireNonNull(inputEditText.getText()).toString())) {
+            stationService.create(new Station(inputEditText.getText().toString()));
+        }
+        updateListView();
     }
 }
