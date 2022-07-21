@@ -121,7 +121,9 @@ public class BusesActivity extends AppCompatActivity {
 
     public void deleteBusButtonClick(View view) {
         if (busesList.getCheckedItemPosition() != -1) {
-            Bus deleteBus = busService.findByName(busesList.getItemAtPosition(busesList.getCheckedItemPosition()).toString());
+            String searchBus = busesList.getItemAtPosition(busesList.getCheckedItemPosition()).toString();
+            searchBus = searchBus.substring(0, searchBus.indexOf("(") - 1);
+            Bus deleteBus = busService.findByName(searchBus);
             busService.delete(deleteBus.getId());
             updateListView();
         }
